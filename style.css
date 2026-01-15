@@ -25,7 +25,7 @@
 body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--bg-dark);
-    background-image: url('file:///c:/Users/Badr/Desktop/Gasoil/frontend/assets/background.jpg');
+    background-image: url('assets/background.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

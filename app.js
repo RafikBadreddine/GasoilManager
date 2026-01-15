@@ -536,7 +536,7 @@ function renderFleet() {
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <div class="search-bar" style="background: var(--bg-card); padding: 0.5rem 1rem; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border-color);">
                 <i class="fa-solid fa-search" style="color: var(--text-muted);"></i>
-                <input type="text" id="fleet-search" placeholder="Rechercher un véhicule..." style="border: none; background: transparent; padding: 0; width: 250px; color: white;">
+                <input type="text" id="fleet-search" placeholder="Rechercher un véhicule..." style="border: none; background: transparent; padding: 0; width: 250px;">
             </div>
             <div style="display: flex; gap: 1rem;">
                 <button class="primary-btn" style="width: auto; margin: 0; background: var(--bg-card); border: 1px solid var(--border-color);"><i class="fa-solid fa-file-csv"></i> Import CSV</button>
