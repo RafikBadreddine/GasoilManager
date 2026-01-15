@@ -1,0 +1,19 @@
+{
+  "name": "gasoil",
+  "version": "1.0.0",
+  "description": "Application web complète pour la gestion de consommation de gasoil, flotte de véhicules et statistiques.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mssql": "^12.2.0"
+  }
+}
