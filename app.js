@@ -21,6 +21,7 @@ const currentDateEl = document.getElementById('current-date');
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', async () => {
     setupNavigation();
+    setupSidebar();
     updateDate();
 
     // Charger les données depuis le backend
@@ -64,6 +65,29 @@ function setupNavigation() {
             loadView(target);
         });
     });
+}
+
+function setupSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const toggleBtn = document.getElementById('sidebar-toggle');
+
+    // Hover Interaction
+    sidebar.addEventListener('mouseenter', () => {
+        sidebar.classList.remove('collapsed');
+    });
+
+    sidebar.addEventListener('mouseleave', () => {
+        sidebar.classList.add('collapsed');
+    });
+
+    // Manual Toggle (Mobile support)
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+            // Prevent event from bubbling if it conflicts (though click is inside sidebar, so mouseenter already fired)
+            e.stopPropagation();
+            sidebar.classList.toggle('collapsed');
+        });
+    }
 }
 
 function loadView(viewName) {
@@ -122,6 +146,11 @@ function renderDashboard() {
         return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     });
     const chartDataPoints = recentTrips.map(t => parseFloat(t.fuel));
+
+    // Check for red points (Surconsommation)
+    const pointColors = recentTrips.map(t => {
+        return (t.status && t.status.toLowerCase() === 'dépassement') ? '#ef4444' : '#3b82f6';
+    });
 
     // 2. Répartition par Type (Vehicles)
     const typeStats = { 'Camion': 0, 'Voiture': 0, 'Fourgon': 0, 'Frigo': 0 };
@@ -184,7 +213,7 @@ function renderDashboard() {
 
     // Initialize Charts (using Chart.js)
     setTimeout(() => {
-        initDashboardCharts(chartLabels, chartDataPoints, typeLabels, typeValues);
+        initDashboardCharts(chartLabels, chartDataPoints, typeLabels, typeValues, pointColors);
         setupTopBarInteractions();
 
         // Listener spécifique pour la carte d'alertes
@@ -208,7 +237,7 @@ function renderDashboard() {
     }, 100);
 }
 
-function initDashboardCharts(lineLabels, lineData, doughnutLabels, doughnutData) {
+function initDashboardCharts(lineLabels, lineData, doughnutLabels, doughnutData, pointColors) {
     const ctx1 = document.getElementById('consoChart').getContext('2d');
     const gradient = ctx1.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
@@ -224,7 +253,10 @@ function initDashboardCharts(lineLabels, lineData, doughnutLabels, doughnutData)
                 borderColor: '#3b82f6',
                 backgroundColor: gradient,
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointBackgroundColor: pointColors,
+                pointBorderColor: pointColors,
+                pointRadius: 5
             }]
         },
         options: {
@@ -262,19 +294,24 @@ function setupTopBarInteractions() {
     if (notifBtn && !notifBtn.hasAttribute('data-initialized')) {
         notifBtn.setAttribute('data-initialized', 'true');
         notifBtn.addEventListener('click', () => {
-            const alerts = AppState.trips.filter(t => t.status && t.status.toLowerCase() === 'dépassement');
+            const today = new Date().toLocaleDateString('fr-FR');
+
+            // Filter: Status 'Dépassement' AND Date match 'today'
+            const alerts = AppState.trips.filter(t => {
+                const tripDate = new Date(t.date).toLocaleDateString('fr-FR');
+                return (t.status && t.status.toLowerCase() === 'dépassement') && (tripDate === today);
+            });
 
             if (alerts.length > 0) {
-                let msg = `🔔 ALERTES DE SURCONSOMMATION (${alerts.length})\n\n`;
+                let msg = `🔔 ALERTES DU JOUR (${alerts.length})\n\n`;
                 alerts.forEach(t => {
                     const vehicle = AppState.vehicles.find(v => v.id === t.vehicleId);
                     const plate = vehicle ? vehicle.plate : 'Véhicule Inconnu';
-                    const date = new Date(t.date).toLocaleDateString('fr-FR');
-                    msg += `- ${plate} le ${date} (Conso: ${t.consumption.toFixed(1)})\n`;
+                    msg += `- ${plate} (Conso: ${t.consumption.toFixed(1)})\n`;
                 });
                 alert(msg);
             } else {
-                alert("🔔 NOTIFICATIONS\n\nAucune nouvelle notification.\nTout est calme pour le moment.");
+                alert("🔔 NOTIFICATIONS DU JOUR\n\nAucune alerte de surconsommation pour aujourd'hui.");
             }
         });
     }
